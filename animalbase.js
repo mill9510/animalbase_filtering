@@ -16,6 +16,8 @@ const Animal = {
   desc: "-unknown animal-",
   type: "",
   age: 0,
+  star: false,
+  winner: false,
 };
 
 function start() {
@@ -68,8 +70,8 @@ function prepareObjects(jsonData) {
 
     //adder object til en global array
     allAnimals.push(animal);
-
-    displayList(allAnimals);
+    // fixed so we build and sort on the first load
+    buildList();
   });
 }
 
@@ -179,6 +181,145 @@ function displayAnimal(animal) {
   clone.querySelector("[data-field=type]").textContent = animal.type;
   clone.querySelector("[data-field=age]").textContent = animal.age;
 
+  //denne fortæller at hvis star er true skal den vise full star
+  //og hvis den er false skal den vise empty star
+  if (animal.star === true) {
+    clone.querySelector("[data-field=star]").textContent = "★";
+  } else {
+    clone.querySelector("[data-field=star]").textContent = "☆";
+  }
+
+  //eventlistener på star, som refererer til clickstar
+  clone.querySelector("[data-field=star]").addEventListener("click", clickStar);
+
+  // denne fortæller at hvis star er true og der klikkes skal den ændres til false
+  // og hvis den er false ændres den til true
+  function clickStar() {
+    if (animal.star === true) {
+      animal.star = false;
+    } else {
+      animal.star = true;
+    }
+
+    buildList();
+  }
+
+  //winner
+  clone.querySelector("[data-field=winner]").dataset.winner = animal.winner;
+
+  //eventlistener på winner, som refererer til clickWinner
+  clone.querySelector("[data-field=winner]").addEventListener("click", clickWinner);
+
+  // denne if else fortæller at hvis winner er true når der klikkes skal den blive false
+  // og hvis den er false når der klikkes skal den blive true
+  function clickWinner() {
+    if (animal.winner === true) {
+      animal.winner = false;
+    } else {
+      tryToMakeAWinner(animal);
+    }
+
+    buildList();
+  }
+
   // append clone to list
   document.querySelector("#list tbody").appendChild(clone);
+}
+
+function tryToMakeAWinner(selectedAnimal) {
+  //samling af vindere
+  const winners = allAnimals.filter((animal) => animal.winner);
+
+  // afgiver antallet af vindere
+  const numberOfWinners = winners.length;
+  const other = winners.filter((animal) => animal.type === selectedAnimal.type).shift();
+
+  //if there is another of the same type or more than two winners
+  if (other !== undefined) {
+    console.log("There can only be one of the same type!");
+    removeOther(other);
+  } else if (numberOfWinners >= 2) {
+    console.log("There can only be two winners!");
+    removeAorB(winners[0], winners[1]);
+  } else {
+    makeWinner(selectedAnimal);
+  }
+
+  function removeOther(other) {
+    //ask user to ignore or remove 'other'
+    //fjerner classen hide på removeother boksen
+    document.querySelector("#removeOther").classList.remove("hide");
+    //eventlistener som refererer til closedialgue
+    document.querySelector("#removeOther .closebutton").addEventListener("click", closeDialogue);
+    // eventlistener som refererer til clickremoveother
+    document.querySelector("#removeOther #removeOtherButton").addEventListener("click", clickRemoveOther);
+
+    document.querySelector("#removeOther [data-field=otherwinner]").textContent = other.name;
+
+    //if ignore - do nothing
+    function closeDialogue() {
+      document.querySelector("#removeOther").classList.add("hide");
+      document.querySelector("#removeOther .closebutton").removeEventListener("click", closeDialogue);
+      document.querySelector("#removeOther #removeOtherButton").removeEventListener("click", clickRemoveOther);
+    }
+
+    //if remove other
+    function clickRemoveOther() {
+      removeWinner(other);
+      makeWinner(selectedAnimal);
+      //buildlist for at opdatere listen, så den nye selected fremtræder i stedet
+      buildList();
+      // denne sørger for at dialogue lukker når valget træffes
+      closeDialogue();
+    }
+  }
+
+  function removeAorB(winnerA, winnerB) {
+    // ask the user to ignore or remove a or b
+    document.querySelector("#removeAorB").classList.remove("hide");
+    //eventlistener som refererer til closedialgue
+    document.querySelector("#removeAorB .closebutton").addEventListener("click", closeDialogue);
+    // eventlistener som refererer til clickremoveA
+    document.querySelector("#removeAorB #removeA").addEventListener("click", clickRemoveA);
+    // eventlistener som refererer til clickremoveB
+    document.querySelector("#removeAorB #removeB").addEventListener("click", clickRemoveB);
+
+    //if ignore - do nothing
+    function closeDialogue() {
+      document.querySelector("#removeAorB").classList.add("hide");
+      document.querySelector("#removeAorB .closebutton").removeEventListener("click", closeDialogue);
+      document.querySelector("#removeAorB #removeA").removeEventListener("click", clickRemoveA);
+      document.querySelector("#removeAorB #removeB").removeEventListener("click", clickRemoveB);
+    }
+
+    //show names on buttons
+    document.querySelector("#removeAorB [data-field=winnerA]").textContent = winnerA.name;
+    document.querySelector("#removeAorB [data-field=winnerB]").textContent = winnerB.name;
+
+    //if remove A:
+    function clickRemoveA() {
+      removeWinner(winnerA);
+      makeWinner(selectedAnimal);
+
+      buildList();
+      closeDialogue();
+    }
+
+    // else - if remove B
+    function clickRemoveB() {
+      removeWinner(winnerB);
+      makeWinner(selectedAnimal);
+
+      buildList();
+      closeDialogue();
+    }
+  }
+
+  function removeWinner(winnerAnimal) {
+    winnerAnimal.winner = false;
+  }
+
+  function makeWinner(animal) {
+    animal.winner = true;
+  }
 }

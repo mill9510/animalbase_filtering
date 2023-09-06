@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Animalbase</title>
-    <link rel="stylesheet" href="animalbase.css">
+    <link rel="stylesheet" href="animalbase.css" />
   </head>
   <body>
     <h1>Animals</h1>
@@ -16,11 +16,13 @@
       <button class="filter" data-action="filter" data-filter="*">all</button>
     </p>
 
-    <hr>
+    <hr />
 
     <table id="list">
       <thead>
         <tr id="sorting">
+          <th data-action="sort" data-sort-direction="asc" data-sort="winner">Winner</th>
+          <th data-action="sort" data-sort-direction="asc" data-sort="star">Star</th>
           <th data-action="sort" data-sort-direction="asc" data-sort="name">Name</th>
           <th data-action="sort" data-sort-direction="asc" data-sort="type">Type</th>
           <th data-action="sort" data-sort-direction="asc" data-sort="desc">Description</th>
@@ -34,6 +36,8 @@
 
     <template id="animal">
       <tr>
+        <td data-field="winner" data-winner="false"></td>
+        <td data-field="star">☆</td>
         <td data-field="name">NAME</td>
         <td data-field="type">TYPE</td>
         <td data-field="desc">DESCRIPTION</td>
@@ -41,7 +45,33 @@
       </tr>
     </template>
 
-    
+    <div id="removeOther" class="modal hide">
+      <div class="dialogue">
+        <button class="closebutton">X</button>
+        <h1>Warning!</h1>
+        <p>
+          There can be only one winner of each type. <br />
+          Do you want to remove the other winner?
+        </p>
+        <button id="removeOtherButton">Remove <span data-field="otherwinner">other</span></button>
+      </div>
+    </div>
+
+    <div id="removeAorB" class="modal hide">
+      <div class="dialogue">
+        <button class="closebutton">X</button>
+        <h1>Warning!</h1>
+        <p>
+          There can not be any more than two winners. <br />
+          Do you wish to remove one of the existing?
+        </p>
+        <div class="sideBySide">
+          <button id="removeA">Remove <span data-field="winnerA">A</span></button>
+          <button id="removeB">Remove <span data-field="winnerB">B</span></button>
+        </div>
+      </div>
+    </div>
+
     <script src="animalbase.js"></script>
   </body>
 </html>
